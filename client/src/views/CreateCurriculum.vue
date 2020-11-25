@@ -9,10 +9,13 @@
       <v-form class="create-form">
         <v-row>
           <v-col cols="3">
-            <v-subheader>Nom</v-subheader>
+            <v-subheader>Nom *</v-subheader>
           </v-col>
           <v-col cols="9">
-            <v-text-field v-model="name" />
+            <ValidationProvider rules="required" v-slot="{ errors }">
+              <v-text-field v-model="name" />
+              <small class="error-text">{{ errors[0] }}</small>
+            </ValidationProvider>
           </v-col>
         </v-row>
 
@@ -40,10 +43,13 @@
                 <v-card-text>
                   <v-row>
                     <v-col cols="3">
-                      <v-subheader>Nom</v-subheader>
+                      <v-subheader>Nom *</v-subheader>
                     </v-col>
                     <v-col cols="9">
-                      <v-text-field v-model="section.name" />
+                      <ValidationProvider rules="required" v-slot="{ errors }">
+                        <v-text-field v-model="section.name" />
+                        <small class="error-text">{{ errors[0] }}</small>
+                      </ValidationProvider>
                     </v-col>
                   </v-row>
 
@@ -62,7 +68,15 @@
                         <v-col cols="12">
                           <v-form>
                             <v-text-field v-model="section.newResource.name" placeholder="Nom de la ressource" />
-                            <v-text-field v-model="section.newResource.link" placeholder="Lien de la ressource" />
+                            <ValidationProvider
+                              :rules="{
+                                link: /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/
+                              }"
+                              v-slot="{ errors }"
+                            >
+                              <v-text-field v-model="section.newResource.link" placeholder="Lien de la ressource" />
+                              <small class="error-text">{{ errors[0] }}</small>
+                            </ValidationProvider>
                           </v-form>
                           <v-btn @click="addItem('resource', sectionIndex)">Valider</v-btn>
                         </v-col>
@@ -152,9 +166,13 @@
 
 <script>
 import { mapActions } from 'vuex'
+import { ValidationProvider } from 'vee-validate'
 
 export default {
   name: 'CreateCurriculum',
+  components: {
+    ValidationProvider
+  },
   data: () => {
     return {
       name: '',
