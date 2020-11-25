@@ -60,11 +60,11 @@
                     <v-card-text>
                       <v-row no-gutters>
                         <v-col cols="12">
-                          <v-text-field
-                            v-model="section.newResource"
-                            placeholder="Lien de la ressource"
-                            @keyup.enter="addItem('resources', sectionIndex)"
-                          />
+                          <v-form>
+                            <v-text-field v-model="section.newResource.name" placeholder="Nom de la ressource" />
+                            <v-text-field v-model="section.newResource.link" placeholder="Lien de la ressource" />
+                          </v-form>
+                          <v-btn @click="addItem('resource', sectionIndex)">Valider</v-btn>
                         </v-col>
                       </v-row>
 
@@ -74,16 +74,11 @@
                             <template v-for="(resource, index) in section.resources">
                               <v-list-item :key="resource + index">
                                 <v-list-item-content>
-                                  <v-list-item-title>
-                                    {{ resource }}
-                                  </v-list-item-title>
+                                  <v-list-item-title> {{ resource.name }} </v-list-item-title>
                                 </v-list-item-content>
                                 <v-list-item-action>
                                   <v-btn icon>
-                                    <v-icon
-                                      color="red lighten-2"
-                                      @click="deleteItem('resources', sectionIndex, index)"
-                                    >
+                                    <v-icon color="red lighten-2" @click="deleteItem('resources', sectionIndex, index)">
                                       mdi-close-circle
                                     </v-icon>
                                   </v-btn>
@@ -101,11 +96,11 @@
                     <v-card-text>
                       <v-row no-gutters>
                         <v-col cols="12">
-                          <v-text-field
-                            v-model="section.newProject"
-                            placeholder="Lien du projet"
-                            @keyup.enter="addItem('projects', sectionIndex)"
-                          />
+                          <v-form>
+                            <v-text-field v-model="section.newProject.name" placeholder="Nom du projet" />
+                            <v-text-field v-model="section.newProject.link" placeholder="Lien du projet" />
+                            <v-btn @click="addItem('project', sectionIndex)">Valider</v-btn>
+                          </v-form>
                         </v-col>
                       </v-row>
 
@@ -115,16 +110,11 @@
                             <template v-for="(project, index) in section.projects">
                               <v-list-item :key="project + index">
                                 <v-list-item-content>
-                                  <v-list-item-title>
-                                    {{ project }}
-                                  </v-list-item-title>
+                                  <v-list-item-title> {{ project.name }} </v-list-item-title>
                                 </v-list-item-content>
                                 <v-list-item-action>
                                   <v-btn icon>
-                                    <v-icon
-                                      color="red lighten-2"
-                                      @click="deleteItem('projects', sectionIndex, index)"
-                                    >
+                                    <v-icon color="red lighten-2" @click="deleteItem('projects', sectionIndex, index)">
                                       mdi-close-circle
                                     </v-icon>
                                   </v-btn>
@@ -148,6 +138,15 @@
         </v-btn>
       </v-form>
     </v-col>
+    <v-snackbar v-model="snackbar" :right="true" :top="true" :timeout="4000">
+      {{ snackbarText }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-row>
 </template>
 
@@ -165,12 +164,20 @@ export default {
         {
           name: '',
           goal: '',
-          newResource: '',
+          newResource: {
+            name: '',
+            link: ''
+          },
           resources: [],
-          newProject: '',
+          newProject: {
+            name: '',
+            link: ''
+          },
           projects: []
         }
-      ]
+      ],
+      snackbar: false,
+      snackbarText: ''
     }
   },
   methods: {
@@ -189,17 +196,34 @@ export default {
     addSection() {
       this.sections.push({
         name: '',
+        goal: '',
+        newResource: {
+          name: '',
+          link: ''
+        },
         resources: [],
+        newProject: {
+          name: '',
+          link: ''
+        },
         projects: []
       })
     },
     addItem(type, index) {
-      if (type === 'resources' && this.sections[index].newResource.length > 0) {
-        this.sections[index].resources.push(this.sections[index].newResource)
-        this.sections[index].newResource = ''
-      } else if (type === 'projects' && this.sections[index].newProject.length > 0) {
-        this.sections[index].projects.push(this.sections[index].newProject)
-        this.sections[index].newProject = ''
+      const key = `new${type[0].toUpperCase()}${type.slice(1)}`
+      const item = this.sections[index][key]
+
+      if (item.name) {
+        const obj = {
+          name: item.name,
+          link: item.link
+        }
+        this.sections[index][`${type}s`].push(obj)
+        item.name = ''
+        item.link = ''
+      } else {
+        this.snackbar = true
+        this.snackbarText = `Merci de préciser le nom ${type === 'resource' ? 'de la ressource' : 'du projet'}`
       }
     },
     deleteItem(type, sectionIndex, index) {
