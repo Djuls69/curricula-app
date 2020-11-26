@@ -1,4 +1,5 @@
 import axios from 'axios'
+import router from '../router'
 
 const API_URL = 'http://localhost:5000/api/curricula'
 
@@ -9,6 +10,7 @@ export default {
   },
   postCurriculum: async ({ commit }, formData) => {
     const { data } = await axios.post(API_URL, formData)
-    console.log(data)
+    commit('appendCurriculum', data)
+    router.push(`/curricula/${data._id}`)
   }
 }
