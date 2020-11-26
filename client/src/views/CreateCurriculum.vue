@@ -16,20 +16,11 @@
         :deleteItem="deleteItem"
       />
     </v-col>
-    <v-snackbar v-model="snackbar" color="error" :multi-line="true" :right="true" :top="true" :timeout="4000">
-      {{ snackbarText }}
-
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="snackbar = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
   </v-row>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapMutations } from 'vuex'
 import MainForm from '@/components/create-form/MainForm'
 
 const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/
@@ -64,12 +55,11 @@ export default {
           },
           projects: []
         }
-      ],
-      snackbar: false,
-      snackbarText: ''
+      ]
     }
   },
   methods: {
+    ...mapMutations(['updateSnackbar']),
     ...mapActions(['postCurriculum']),
     saveCurriculum() {
       if (this.$refs['pet-info-form'].validate()) {
@@ -121,12 +111,15 @@ export default {
         item.url = ''
         this.$refs.form.reset()
       } else {
-        this.snackbar = true
-        this.snackbarText = !item.name
-          ? 'Merci de préciser le nom'
-          : !item.url
-          ? 'Merci de spécifier un lien'
-          : 'Lien non valide'
+        this.updateSnackbar({
+          show: true,
+          message: !item.name
+            ? 'Merci de préciser le nom'
+            : !item.url
+            ? 'Merci de spécifier un lien'
+            : 'Lien non valide',
+          variant: 'error'
+        })
       }
     },
     deleteItem(type, sectionIndex, index) {

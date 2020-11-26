@@ -4,5 +4,11 @@ export default {
   },
   appendCurriculum: (state, curriculum) => {
     state.curricula = [...state.curricula, curriculum]
+  },
+  updateSnackbar: (state, payload) => {
+    state.snackbar = {
+      ...state.snackbar,
+      ...payload
+    }
   }
 }
